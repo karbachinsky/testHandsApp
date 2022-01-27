@@ -52,6 +52,9 @@ class ViewController: UIViewController {
         
         cells.append(newCellType)
         mainTable.reloadData()
+        
+        let indexPath = NSIndexPath(row: cells.count - 1, section: 0)
+        mainTable.scrollToRow(at: indexPath as IndexPath, at: .bottom, animated: true)
     }
     
 }
