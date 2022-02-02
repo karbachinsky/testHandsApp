@@ -11,13 +11,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var mainTable: UITableView!
     
-    let cellsContent = [
-        MainCellModel(image: "ic.deadCell", status: "Мёртвая", clarification: "или прикидывается"),
-        MainCellModel(image: "ic.liveCell", status: "Живая", clarification: "и шевелится!"),
-        MainCellModel(image: "ic.lifeCell", status: "Жизнь", clarification: "Ку-ку!")
-    ]
-    
-    var cells = [Int]() // Для заполнения таблицы по типам ячеек (для удобства можно будет сделать с enum)
+    private var model = MainModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,22 +32,10 @@ class ViewController: UIViewController {
     }
 
     @IBAction func createCellButtonAction(_ sender: Any) {
-        var newCellType = Int(arc4random_uniform(2))
-        
-        if cells.count >= 3 && cells[cells.count - 1] == cells[cells.count - 2] && cells[cells.count - 2] == cells[cells.count - 3] {
-            if cells[cells.count - 1] == 1 { // Если трижды подряд создалась живая клетка
-                newCellType = 2
-            } else if cells[cells.count - 1] == 0 { // Если трижды подряд родилась мёртвая клетка
-                if let row = cells.reversed().firstIndex(where: {$0 == 2}) {
-                    cells[row.base - 1] = 0
-                }
-            }
-        }
-        
-        cells.append(newCellType)
+        model.content()
         mainTable.reloadData()
         
-        let indexPath = NSIndexPath(row: cells.count - 1, section: 0)
+        let indexPath = NSIndexPath(row: model.count - 1, section: 0)
         mainTable.scrollToRow(at: indexPath as IndexPath, at: .bottom, animated: true)
     }
     
@@ -62,13 +44,16 @@ class ViewController: UIViewController {
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        cells.count
+        model.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let typeIndex = cells[indexPath.row]
+        guard let cellContent = model.getCellContent(index: indexPath.row) else {
+            return UITableViewCell()
+        }
+        
         if let cell = mainTable.dequeueReusableCell(withIdentifier: "mainCell") as? MainTableCell {
-            cell.setup(data: cellsContent[typeIndex])
+            cell.setup(data: cellContent)
             return cell
         } else {
             return UITableViewCell()
